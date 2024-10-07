@@ -49,7 +49,7 @@ optim:
   set_grads_to_none: false
 
 wandb:
-  entity: 'add your entity'
+  entity: 'vladimirfrants9-the-city-university-of-new-york'
   project_name: 'cifar10-kan-convs'
 
 loss:

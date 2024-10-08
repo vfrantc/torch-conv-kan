@@ -20,7 +20,7 @@ unpack_data: true
 checkpointing_steps: 5000
 checkpoints_total_limit: 1000
 find_unused_parameters: false
-use_mixup: false
+use_mixup: true
 
 metrics:
   report_type: 'classification'

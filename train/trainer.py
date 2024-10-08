@@ -356,7 +356,9 @@ def train_model(model, dataset_train, dataset_val, loss_func, cfg, dataset_test=
 
                 with accelerator.accumulate(model):
                     # Convert images to latent space
+                    print(batch)
                     images, labels = batch
+
 
                     if cfg.use_torch_compile:
                         output = compiled_model(images)

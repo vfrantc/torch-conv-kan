@@ -9,6 +9,7 @@ train_batch_size: 256
 val_batch_size: 256
 dataloader_num_workers: 22
 seed: 42
+use_mixup: false
 
 tracking_metric: 'accuracy'
 use_torch_compile: false

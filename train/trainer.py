@@ -356,10 +356,6 @@ def train_model(model, dataset_train, dataset_val, loss_func, cfg, dataset_test=
 
                 with accelerator.accumulate(model):
                     # Convert images to latent space
-                    print('Printing batch: ')
-                    print(type(batch))
-                    print(batch)
-                    print(batch.shape)
 
                     images, labels = batch()
 

@@ -360,8 +360,8 @@ def train_model(model, dataset_train, dataset_val, loss_func, cfg, dataset_test=
                     print(type(batch))
                     print(batch)
                     print(batch.shape)
-                    
-                    images, labels = batch
+
+                    images, labels = batch()
 
 
                     if cfg.use_torch_compile:

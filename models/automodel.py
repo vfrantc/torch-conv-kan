@@ -1,5 +1,4 @@
 from typing import Union
-
 import torch.nn as nn
 from huggingface_hub import PyTorchModelHubMixin
 

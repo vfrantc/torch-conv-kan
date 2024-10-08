@@ -51,7 +51,7 @@ optim:
   use_triton: false
 
 wandb:
-  entity: 'add your entity'
+  entity: 'vladimirfrants9-the-city-university-of-new-york'
   project_name: 'tiny-imagenet-vgg'
 
 loss:

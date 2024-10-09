@@ -33,7 +33,7 @@ def get_data():
 
 @hydra.main(version_base=None, config_path="./configs/", config_name="cafar10-qreskanet.yaml")
 def main(cfg):
-    model = resqkanet_18x32p(3,
+    model = resqkanet_18x32p(4,
                             10,
                             groups=cfg.model.groups,
                             spline_order=int(cfg.model.spline_order),

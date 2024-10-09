@@ -4,11 +4,11 @@ from typing import Callable, List, Optional, Type, Union
 import torch.nn as nn
 from torch import Tensor, flatten
 
-from kan_convs import KALNConv2DLayer, KANConv2DLayer, KACNConv2DLayer, FastKANConv2DLayer, KAGNConv2DLayer, \
+from kan_convs import QKANConv2DLayer, KALNConv2DLayer, KANConv2DLayer, KACNConv2DLayer, FastKANConv2DLayer, KAGNConv2DLayer, \
     BottleNeckKAGNConv2DLayer
-from .model_utils import kan_conv1x1, kagn_conv1x1, kacn_conv1x1, kaln_conv1x1, fast_kan_conv1x1, \
+from .model_utils import qkan_conv1x1, kan_conv1x1, kagn_conv1x1, kacn_conv1x1, kaln_conv1x1, fast_kan_conv1x1, \
     bottleneck_kagn_conv1x1
-from .model_utils import kan_conv3x3, kagn_conv3x3, kacn_conv3x3, kaln_conv3x3, fast_kan_conv3x3, moe_kaln_conv3x3, \
+from .model_utils import qkan_conv3x3, kan_conv3x3, kagn_conv3x3, kacn_conv3x3, kaln_conv3x3, fast_kan_conv3x3, moe_kaln_conv3x3, \
     bottleneck_kagn_conv3x3
 from .model_utils import moe_bottleneck_kagn_conv3x3
 
@@ -77,6 +77,39 @@ class KANBasicBlock(BasicBlockTemplate):
 
         super(KANBasicBlock, self).__init__(conv1x1x1_fun,
                                             conv3x3x3_fun,
+                                            inplanes=inplanes,
+                                            planes=planes,
+                                            stride=stride,
+                                            downsample=downsample,
+                                            groups=groups,
+                                            base_width=base_width,
+                                            dilation=dilation)
+
+class QKANBasicBlock(BasicBlockTemplate):
+    def __init__(self,
+                 inplanes: int,
+                 planes: int,
+                 spline_order: int = 3,
+                 grid_size: int = 5, base_activation: Optional[Callable[..., nn.Module]] = nn.GELU,
+                 grid_range: List = [-1, 1],
+                 stride: int = 1,
+                 downsample: Optional[nn.Module] = None,
+                 groups: int = 1,
+                 base_width: int = 64,
+                 dilation: int = 1,
+                 dropout: float = 0.0,
+                 l1_decay: float = 0.0,
+                 **norm_kwargs
+                 ):
+        qconv1x1x1_fun = partial(qkan_conv1x1, spline_order=spline_order, grid_size=grid_size,
+                                base_activation=base_activation, grid_range=grid_range,
+                                dropout=dropout, l1_decay=l1_decay, **norm_kwargs)
+        qconv3x3x3_fun = partial(qkan_conv3x3, spline_order=spline_order, grid_size=grid_size,
+                                base_activation=base_activation, grid_range=grid_range,
+                                dropout=dropout, l1_decay=l1_decay, **norm_kwargs)
+
+        super(QKANBasicBlock, self).__init__(qconv1x1x1_fun,
+                                            qconv3x3x3_fun,
                                             inplanes=inplanes,
                                             planes=planes,
                                             stride=stride,
@@ -791,7 +824,7 @@ class ResKANet(nn.Module):
 class ResQKANet(nn.Module):
     def __init__(
             self,
-            block: Type[Union[KANBasicBlock, FastKANBasicBlock, KALNBasicBlock, KACNBasicBlock, KAGNBasicBlock,
+            block: Type[Union[QKANBasicBlock, KANBasicBlock, FastKANBasicBlock, KALNBasicBlock, KACNBasicBlock, KAGNBasicBlock,
                               KANBottleneck, FastKANBottleneck, KALNBottleneck, KACNBottleneck, KAGNBottleneck,
                               BottleneckKAGNBottleneck, BottleneckKAGNBasicBlock]],
             layers: List[int],
@@ -844,7 +877,10 @@ class ResQKANet(nn.Module):
         else:
             fc_layers = [64 * width_scale * block.expansion, num_classes]
 
-        if block in (KANBasicBlock, KANBottleneck):
+        if block in (QKANBasicBlock,):
+            self.conv1 = QKANConv2DLayer(input_channels, self.inplanes, kernel_size=fcnv_kernel_size, stride=fcnv_stride,
+                                        padding=fcnv_padding, **kan_kwargs_clean)
+        elif block in (KANBasicBlock, KANBottleneck):
             self.conv1 = KANConv2DLayer(input_channels, self.inplanes, kernel_size=fcnv_kernel_size, stride=fcnv_stride,
                                         padding=fcnv_padding, **kan_kwargs_clean)
             # self.fc = KAN(fc_layers, **kan_kwargs_fc)
@@ -897,7 +933,7 @@ class ResQKANet(nn.Module):
     def _make_layer(
             self,
             block: Type[Union[
-                KANBasicBlock, FastKANBasicBlock, KALNBasicBlock, KACNBasicBlock, BottleneckKAGNBasicBlock, BottleneckKAGNBottleneck,
+                QKANBasicBlock, KANBasicBlock, FastKANBasicBlock, KALNBasicBlock, KACNBasicBlock, BottleneckKAGNBasicBlock, BottleneckKAGNBottleneck,
                 KANBottleneck, FastKANBottleneck, KALNBottleneck, KACNBottleneck]],
             planes: int,
             blocks: int,
@@ -911,8 +947,9 @@ class ResQKANet(nn.Module):
             self.dilation *= stride
             stride = 1
         if stride != 1 or self.inplanes != planes * block.expansion:
-
-            if block in (KANBasicBlock, KANBottleneck):
+            if block in (QKANBasicBlock):
+                conv1x1 = partial(qkan_conv1x1, **kan_kwargs)
+            elif block in (KANBasicBlock, KANBottleneck):
                 conv1x1 = partial(kan_conv1x1, **kan_kwargs)
             elif block in (FastKANBasicBlock, FastKANBottleneck):
                 conv1x1 = partial(fast_kan_conv1x1, **kan_kwargs)
@@ -1158,6 +1195,24 @@ def reskanet_18x32p(input_channels, num_classes, groups: int = 1, spline_order: 
                     affine=affine
                     )
 
+def resqkanet_18x32p(input_channels, num_classes, groups: int = 1, spline_order: int = 3, grid_size: int = 5,
+                    base_activation: Optional[Callable[..., nn.Module]] = nn.GELU,
+                    grid_range: List = [-1, 1], hidden_layer_dim=None, dropout: float = 0.0, l1_decay: float = 0.0,
+                    dropout_linear: float = 0.25, affine: bool = False):
+    return ResQKANet(QKANBasicBlock, [2, 2, 2, 2],
+                    input_channels=input_channels,
+                    use_first_maxpool=False,
+                    fcnv_kernel_size=3, fcnv_stride=1, fcnv_padding=1,
+                    num_classes=num_classes,
+                    groups=groups,
+                    width_per_group=64,
+                    spline_order=spline_order, grid_size=grid_size, base_activation=base_activation,
+                    grid_range=grid_range, hidden_layer_dim=hidden_layer_dim,
+                    dropout_linear=dropout_linear,
+                    dropout=dropout,
+                    l1_decay=l1_decay,
+                    affine=affine
+                    )
 
 def fast_reskanet_18x32p(input_channels, num_classes, groups: int = 1, grid_size: int = 5,
                          base_activation: Optional[Callable[..., nn.Module]] = nn.GELU,

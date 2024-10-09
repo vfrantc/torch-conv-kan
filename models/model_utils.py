@@ -2,7 +2,7 @@ from typing import Callable, List, Optional
 
 import torch.nn as nn
 
-from kan_convs import KALNConv2DLayer, KANConv2DLayer, KACNConv2DLayer, FastKANConv2DLayer, KAGNConv2DLayer, \
+from kan_convs import KALNConv2DLayer, QKANConv2DLayer, KANConv2DLayer, KACNConv2DLayer, FastKANConv2DLayer, KAGNConv2DLayer, \
     WavKANConv2DLayer
 from kan_convs import MoEKALNConv2DLayer, MoEKAGNConv2DLayer, BottleNeckKAGNConv2DLayer
 from kan_convs import SelfKAGNtention2D, BottleNeckSelfKAGNtention2D
@@ -35,6 +35,30 @@ def kan_conv3x3(in_planes: int, out_planes: int, spline_order: int = 3, groups: 
         conv = L1(conv, l1_decay)
     return conv
 
+def qkan_conv3x3(in_planes: int, out_planes: int, spline_order: int = 3, groups: int = 1, stride: int = 1,
+                dilation: int = 1, grid_size: int = 5, base_activation: Optional[Callable[..., nn.Module]] = nn.GELU,
+                grid_range: List = [-1, 1], l1_decay: float = 0.0,
+                dropout: float = 0.0, **norm_kwargs) -> QKANConv2DLayer:
+    """3x3 convolution with padding"""
+
+    conv = QKANConv2DLayer(
+        in_planes,
+        out_planes,
+        kernel_size=3,
+        spline_order=spline_order,
+        stride=stride,
+        padding=dilation,
+        dilation=dilation,
+        groups=groups,
+        grid_size=grid_size,
+        base_activation=base_activation,
+        grid_range=grid_range,
+        dropout=dropout,
+        **norm_kwargs
+    )
+    if l1_decay > 0:
+        conv = L1(conv, l1_decay)
+    return conv
 
 def conv3x3(in_planes: int, out_planes: int, groups: int = 1, stride: int = 1,
             dilation: int = 1, base_activation: Optional[Callable[..., nn.Module]] = nn.GELU,
@@ -58,6 +82,24 @@ def kan_conv1x1(in_planes: int, out_planes: int, spline_order: int = 3, stride: 
                 dropout: float = 0.0, **norm_kwargs) -> KANConv2DLayer:
     """1x1 convolution"""
     conv = KANConv2DLayer(in_planes, out_planes,
+                          kernel_size=1,
+                          spline_order=spline_order,
+                          stride=stride,
+                          grid_size=grid_size,
+                          base_activation=base_activation,
+                          grid_range=grid_range,
+                          dropout=dropout,
+                          **norm_kwargs)
+    if l1_decay > 0:
+        conv = L1(conv, l1_decay)
+    return conv
+
+def qkan_conv1x1(in_planes: int, out_planes: int, spline_order: int = 3, stride: int = 1,
+                grid_size: int = 5, base_activation: Optional[Callable[..., nn.Module]] = nn.GELU,
+                grid_range: List = [-1, 1], l1_decay: float = 0.0,
+                dropout: float = 0.0, **norm_kwargs) -> QKANConv2DLayer:
+    """1x1 convolution"""
+    conv = QKANConv2DLayer(in_planes, out_planes,
                           kernel_size=1,
                           spline_order=spline_order,
                           stride=stride,

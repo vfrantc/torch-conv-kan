@@ -472,11 +472,18 @@ class QKANConvNDLayer(nn.Module):
             dtype=torch.float32
         )
         # Initialize weights using Kaiming uniform distribution for better training start
+        '''
         for conv_layer in self.base_conv:
             nn.init.kaiming_uniform_(conv_layer.weight, nonlinearity='linear')
 
         for conv_layer in self.spline_conv:
             nn.init.kaiming_uniform_(conv_layer.weight, nonlinearity='linear')
+        '''
+        for conv_layer in self.base_conv:
+            conv_layer.reset_parameters()
+
+        for conv_layer in self.spline_conv:
+            conv_layer.reset_parameters()
 
     def forward_kan(self, x, group_index):
 

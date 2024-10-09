@@ -31,7 +31,7 @@ def get_data():
     return train_dataset, val_dataset
 
 
-@hydra.main(version_base=None, config_path="./configs/", config_name="cafar10-reskanet.yaml")
+@hydra.main(version_base=None, config_path="./configs/", config_name="cafar10-qreskanet.yaml")
 def main(cfg):
     model = resqkanet_18x32p(3, 10, groups=cfg.model.groups, degree=cfg.model.degree, width_scale=cfg.model.width_scale,
                              dropout=cfg.model.dropout, l1_decay=cfg.model.l1_decay,

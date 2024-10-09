@@ -947,7 +947,7 @@ class ResQKANet(nn.Module):
             self.dilation *= stride
             stride = 1
         if stride != 1 or self.inplanes != planes * block.expansion:
-            if block in (QKANBasicBlock):
+            if block in (QKANBasicBlock,):
                 conv1x1 = partial(qkan_conv1x1, **kan_kwargs)
             elif block in (KANBasicBlock, KANBottleneck):
                 conv1x1 = partial(kan_conv1x1, **kan_kwargs)

@@ -38,7 +38,6 @@ def main(cfg):
                             spline_order=cfg.model.spline_order,
                             grid_size=cfg.model.grid_size,
                             base_activation=nn.SiLU,
-                            width_scale=cfg.model.width_scale,
                             dropout=cfg.model.dropout,
                             l1_decay=cfg.model.l1_decay,
                             dropout_linear=cfg.model.dropout_linear)

@@ -524,7 +524,7 @@ class QKANConv2DLayer(QKANConvNDLayer):
     def __init__(self, input_dim, output_dim, kernel_size, spline_order=3, groups=1, padding=0, stride=1, dilation=1,
                  grid_size=5, base_activation=nn.GELU, grid_range=[-1, 1], dropout=0.0, norm_layer=nn.InstanceNorm2d,
                  **norm_kwargs):
-        super(QKANConv2DLayer, self).__init__(nn.QConv2d, norm_layer,
+        super(QKANConv2DLayer, self).__init__(QConv2d, norm_layer,
                                              input_dim, output_dim,
                                              spline_order, kernel_size,
                                              groups=groups, padding=padding, stride=stride, dilation=dilation,

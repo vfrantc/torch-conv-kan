@@ -498,9 +498,9 @@ def train_model(model, dataset_train, dataset_val, loss_func, cfg, dataset_test=
                     wandb_tracker.log({key_layer: [wandb.Image(image_layer), ]}, step=global_step)
                 logger.info(f"CAM Visualization logged")
             if save_checkpoints:
-                print('Printing metrics: ')
-                for key, val in metrics.items():
-                    print('{} -- {}\n'.format(key, val))
+                # print('Printing metrics: ')
+                # for key, val in metrics.items():
+                #     print('{} -- {}\n'.format(key, val))
                 save_checkpoint_name = f"checkpoint-{epoch}-{cfg.tracking_metric}-{metrics[cfg.tracking_metric]}"
 
                 save_path = os.path.join(cfg.output_dir, save_checkpoint_name)

@@ -30,7 +30,7 @@ metrics:
 model:
   groups: 1
   spline_order: 3
-  grid_size: 5,
+  grid_size: 5
   width_scale: 1
   dropout: 0.1
   dropout_linear: 0.5

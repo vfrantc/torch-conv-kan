@@ -37,6 +37,8 @@ model:
   l1_decay: 5e-5
   num_classes: 10
   is_moe: false
+  l2_activation_penalty: 1e-5
+  l1_activation_penalty: 1e-5
 
 optim:
   type: 'adamW'

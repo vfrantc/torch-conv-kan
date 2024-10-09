@@ -36,6 +36,7 @@ model:
   dropout_linear: 0.5
   l1_decay: 5e-5
   num_classes: 10
+  is_moe: false
 
 optim:
   type: 'adamW'

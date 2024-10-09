@@ -22,7 +22,7 @@ checkpoints_total_limit: 1000
 find_unused_parameters: false
 use_mixup: true
 
-tracking_metric: 'val_acc'
+tracking_metric: 'train_acc'
 
 metrics:
   report_type: 'classification'

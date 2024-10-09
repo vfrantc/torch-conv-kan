@@ -29,14 +29,12 @@ metrics:
 
 model:
   groups: 1
+  spline_order: 3
+  grid_size: 5,
   width_scale: 1
   dropout: 0.1
   dropout_linear: 0.5
   l1_decay: 5e-5
-  l2_activation_penalty: 1e-5
-  l1_activation_penalty: 1e-5
-  num_classes: 10
-  is_moe: false
 
 optim:
   type: 'adamW'

@@ -1,6 +1,7 @@
 from functools import partial
 from typing import Callable, List, Optional, Type, Union
 
+import torch
 import torch.nn as nn
 from torch import Tensor, flatten
 
@@ -991,6 +992,8 @@ class ResQKANet(nn.Module):
         return nn.Sequential(*layers)
 
     def _forward_impl(self, x: Tensor) -> Tensor:
+        zeros = torch.zeros(x.size(0), 1, x.size(2), x.size(3), device=x.device, dtype=x.dtype)
+        x = torch.cat([x, zeros], dim=1)  # Now x has shape [batch_size, 4, height, width]
         x = self.conv1(x)
         if self.use_first_maxpool:
             x = self.maxpool(x)

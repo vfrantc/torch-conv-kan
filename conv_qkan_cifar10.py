@@ -33,9 +33,15 @@ def get_data():
 
 @hydra.main(version_base=None, config_path="./configs/", config_name="cafar10-qreskanet.yaml")
 def main(cfg):
-    model = resqkanet_18x32p(3, 10, groups=cfg.model.groups, degree=cfg.model.degree, width_scale=cfg.model.width_scale,
-                             dropout=cfg.model.dropout, l1_decay=cfg.model.l1_decay,
-                             dropout_linear=cfg.model.dropout_linear)
+    model = resqkanet_18x32p(3,
+                            10,
+                            groups=cfg.model.groups,
+                            spline_order=int(cfg.model.spline_order),
+                            grid_size=int(cfg.model.grid_size),
+                            base_activation=nn.SiLU,
+                            dropout=cfg.model.dropout,
+                            l1_decay=cfg.model.l1_decay,
+                            dropout_linear=cfg.model.dropout_linear)
     summary(model, (64, 3, 32, 32), device='cpu')
     dataset_train, dataset_test = get_data()
     loss_func = nn.CrossEntropyLoss(label_smoothing=cfg.loss.label_smoothing)

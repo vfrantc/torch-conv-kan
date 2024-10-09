@@ -29,7 +29,6 @@ metrics:
 
 model:
   groups: 1
-  degree: 4
   width_scale: 1
   dropout: 0.1
   dropout_linear: 0.5

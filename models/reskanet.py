@@ -886,9 +886,14 @@ class ResQKANet(nn.Module):
         else:
             fc_layers = [64 * width_scale * block.expansion, num_classes]
 
+        # if block in (QKANBasicBlock,):
+        #     self.conv1 = nn.Conv2d(input_channels, self.inplanes, kernel_size=fcnv_kernel_size, stride=fcnv_stride,
+        #                            padding=fcnv_padding, **kan_kwargs_clean)
+
         if block in (QKANBasicBlock,):
-            self.conv1 = nn.Conv2d(input_channels, self.inplanes, kernel_size=fcnv_kernel_size, stride=fcnv_stride,
+            self.conv1 = KANConv2DLayer(input_channels, self.inplanes, kernel_size=fcnv_kernel_size, stride=fcnv_stride,
                                         padding=fcnv_padding, **kan_kwargs_clean)
+
         elif block in (KANBasicBlock, KANBottleneck):
             self.conv1 = KANConv2DLayer(input_channels, self.inplanes, kernel_size=fcnv_kernel_size, stride=fcnv_stride,
                                         padding=fcnv_padding, **kan_kwargs_clean)

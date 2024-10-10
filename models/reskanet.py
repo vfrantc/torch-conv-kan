@@ -823,6 +823,14 @@ class ResKANet(nn.Module):
         return self._forward_impl(x)
 
 class ResQKANet(nn.Module):
+    '''
+    Accuracy with all quaternion convolution: accuracy 0.6506
+        wandb:  accuracy, top5 0.9621
+        wandb:        auc, ovo 0.94101
+        wandb:        auc, ovr 0.94101
+        wandb: f1_score, macro 0.64031
+        wandb: f1_score, micro 0.6506
+    '''
     def __init__(
             self,
             block: Type[Union[QKANBasicBlock, KANBasicBlock, FastKANBasicBlock, KALNBasicBlock, KACNBasicBlock, KAGNBasicBlock,
@@ -879,7 +887,7 @@ class ResQKANet(nn.Module):
             fc_layers = [64 * width_scale * block.expansion, num_classes]
 
         if block in (QKANBasicBlock,):
-            self.conv1 = QKANConv2DLayer(input_channels, self.inplanes, kernel_size=fcnv_kernel_size, stride=fcnv_stride,
+            self.conv1 = nn.Conv2d(input_channels, self.inplanes, kernel_size=fcnv_kernel_size, stride=fcnv_stride,
                                         padding=fcnv_padding, **kan_kwargs_clean)
         elif block in (KANBasicBlock, KANBottleneck):
             self.conv1 = KANConv2DLayer(input_channels, self.inplanes, kernel_size=fcnv_kernel_size, stride=fcnv_stride,
